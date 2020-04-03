@@ -5,9 +5,6 @@ const jwt = require("jsonwebtoken");
 
 const { JWT_SECRET } = process.env;
 
-// status
-const SUCCESSFUL = { status: "success" };
-
 // errors
 const ERROR_USER_TAKEN = { status: "error", error: "Username already taken." };
 const ERROR_USER_NO_EXIST = {
@@ -263,13 +260,26 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
         .send(JSON.stringify(ERROR_USER_NO_EXIST))
         .end();
     } else {
-      await db.addTodosForName(message, username, completed);
+      let id = await db.addTodosForName(message, username, completed);
+      if (!id) {
+        res
+          .status(400)
+          .send(JSON.stringify(ERROR_SAVING))
+          .end();
+        return;
+      }
+      
+      const msg = {
+        id,
+        username,
+        message,
+        completed
+      }
 
-      // TODO: RESPOND HERE WITH THE NEW MESSAGE
-
-      res.send(JSON.stringify(SUCCESSFUL)).end();
+      res.send(JSON.stringify(msg)).end();
     }
   } catch (err) {
+    console.log(err);
     res
       .status(500)
       .send(JSON.stringify(err))
@@ -278,7 +288,9 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
 });
 
 // /tasks/:username/edit/:tid
+// check that todo id and username match
 
-// /tasks/:username/:tid
+// /tasks/:username/delete/:tid
+// check that todo id and username match
 
 module.exports = router;
