@@ -292,8 +292,48 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
 });
 
 // /tasks/:username/edit/:id
-// check that todo id and username match
-// update message and completed values
+// PRIVATE route for specific user
+router.post("/tasks/:username/edit/:id", isAuthenticated, async (req, res) => {
+  let { username, id } = req.params;
+  const { message, completed } = req.body;
+
+  if (!username || !message || !id || completed === undefined) {
+    res
+      .status(400)
+      .send(JSON.stringify(ERROR_MISSING_FIELD))
+      .end();
+    return;
+  }
+
+    username = username.toLowerCase();
+
+    try {
+      const todo = await db.getTodosById(id);
+      // Ensure that this todo is accessible by this user
+      if (!todo || todo.length === 0 || todo[0].username !== username) {
+        return res
+          .status(401)
+          .send(JSON.stringify(ERROR_TOKEN))
+          .end();
+      }
+      
+      await db.editTodoByID(id, message, completed);
+
+      const msg = {
+        id,
+        username,
+        message,
+        completed
+      };
+
+      res.send(JSON.stringify(msg)).end();
+    } catch (err) {
+      res
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
+    }
+});
 
 // DELETE - Allow user to delete one of their todos
 // PRIVATE route for specific user

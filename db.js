@@ -36,14 +36,18 @@ function getAllUsers() {
 
 function addUser(username, password) {
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO users(username, password) VALUES (?, ?)", [username, password], function (err) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(this.lastID);
+    db.run(
+      "INSERT INTO users(username, password) VALUES (?, ?)",
+      [username, password],
+      function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.lastID);
+        }
       }
-    });
-  })
+    );
+  });
 }
 
 function getUserByName(username) {
@@ -80,40 +84,38 @@ function getTodosForName(username) {
 
 function addTodosForName(message, username, completed) {
   return new Promise((resolve, reject) => {
-    db.run("INSERT INTO todos(message, username, completed) VALUES (?, ?, ?)", [message, username, completed], function (err) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(this.lastID);
-      }
-    });
-  })
-}
-
-function getTodosById(id) {
-  return new Promise((resolve, reject) => {
-    db.all(
-      "SELECT * FROM todos WHERE id = (?)",
-      id,
-      (err, rows) => {
+    db.run(
+      "INSERT INTO todos(message, username, completed) VALUES (?, ?, ?)",
+      [message, username, completed],
+      function(err) {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          resolve(this.lastID);
         }
       }
     );
   });
 }
 
-// function editTodoByID(id, message)
+function getTodosById(id) {
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM todos WHERE id = (?)", id, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+}
 
-function deleteTodosById(id) {
+function editTodoByID(id, message, completed) {
   return new Promise((resolve, reject) => {
     db.run(
-      "DELETE FROM todos WHERE id = (?)",
-      id,
-      (err) => {
+      "UPDATE todos SET message = (?), completed = (?) WHERE id = (?)",
+      [message, completed, id],
+      err => {
         if (err) {
           reject(err);
         } else {
@@ -124,6 +126,17 @@ function deleteTodosById(id) {
   });
 }
 
+function deleteTodosById(id) {
+  return new Promise((resolve, reject) => {
+    db.run("DELETE FROM todos WHERE id = (?)", id, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
 
 module.exports = {
   getAllUsers,
@@ -132,5 +145,6 @@ module.exports = {
   getTodosForName,
   addTodosForName,
   getTodosById,
+  editTodoByID,
   deleteTodosById
 };
