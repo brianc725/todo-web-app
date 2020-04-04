@@ -69,17 +69,17 @@ function isAuthenticated(req, res, next) {
 }
 
 // GET - get all users
-router.get("/users", async (req, res) => {
-  try {
-    let rows = await db.getAllUsers();
-    res.send(JSON.stringify(rows)).end();
-  } catch (err) {
-    res
-      .status(500)
-      .send(JSON.stringify({ status: "error", error: err.toString() }))
-      .end();
-  }
-});
+// router.get("/users", async (req, res) => {
+//   try {
+//     let rows = await db.getAllUsers();
+//     res.send(JSON.stringify(rows)).end();
+//   } catch (err) {
+//     res
+//       .status(500)
+//       .send(JSON.stringify({ status: "error", error: err.toString() }))
+//       .end();
+//   }
+// });
 
 // POST - login user
 router.post("/users/login", async (req, res) => {
@@ -274,11 +274,10 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
     } else {
       let id = await db.addTodosForName(message, username, completed);
       if (!id) {
-        res
+        return res
           .status(400)
           .send(JSON.stringify(ERROR_SAVING))
           .end();
-        return;
       }
 
       const msg = {
@@ -305,11 +304,10 @@ router.post("/tasks/:username/edit/:id", isAuthenticated, async (req, res) => {
   const { message, completed } = req.body;
 
   if (!username || !message || !id || completed === undefined) {
-    res
+    return res
       .status(400)
       .send(JSON.stringify(ERROR_MISSING_FIELD))
       .end();
-    return;
   }
 
   const decodedId = req.user.id;
@@ -362,11 +360,10 @@ router.delete(
     let { username, id } = req.params;
 
     if (!username || !id) {
-      res
+      return res
         .status(400)
         .send(JSON.stringify(ERROR_MISSING_FIELD))
         .end();
-      return;
     }
 
     username = username.toLowerCase();

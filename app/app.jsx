@@ -8,22 +8,25 @@ import {
 } from "react-router-dom";
 
 import './styles.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-/* Import Components */
-import HelloWorld from './components/HelloWorld';
-import ShowData from './components/ShowData';
+import Home from './components/Home';
+import Page404 from './components/Page404';
 
-function App(){
+function App(){  
   return (
      <Router>
-      <div>
+      <div className="site_container">
         <Switch>
-          <Route path="/users/:username">
+          {/* <Route path="/users/:username">
             <ShowData />
-          </Route>  
-          <Route path="/">
-            <HelloWorld />
-          </Route>            
+          </Route>  */}
+          <Route exact path="/">
+            <Home />
+          </Route> 
+          <Route>
+            <Page404 />
+          </Route>
         </Switch>
       </div>
     </Router>
