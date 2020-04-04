@@ -90,6 +90,40 @@ function addTodosForName(message, username, completed) {
   })
 }
 
+function getTodosById(id) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM todos WHERE id = (?)",
+      id,
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      }
+    );
+  });
+}
+
+// function editTodoByID(id, message)
+
+function deleteTodosById(id) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      "DELETE FROM todos WHERE id = (?)",
+      id,
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }
+    );
+  });
+}
+
 
 module.exports = {
   getAllUsers,
@@ -97,4 +131,6 @@ module.exports = {
   addUser,
   getTodosForName,
   addTodosForName,
+  getTodosById,
+  deleteTodosById
 };

@@ -5,6 +5,11 @@ const jwt = require("jsonwebtoken");
 
 const { JWT_SECRET } = process.env;
 
+// success
+const SUCCESS_DELETE = {
+  status: "Successful deletion."
+};
+
 // errors
 const ERROR_USER_TAKEN = { status: "error", error: "Username already taken." };
 const ERROR_USER_NO_EXIST = {
@@ -70,9 +75,9 @@ router.get("/users", async (req, res) => {
     res.send(JSON.stringify(rows)).end();
   } catch (err) {
     res
-      .status(500)
-      .send(JSON.stringify(err))
-      .end();
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
   }
 });
 
@@ -123,9 +128,9 @@ router.post("/users/login", async (req, res) => {
     }
   } catch (err) {
     res
-      .status(500)
-      .send(JSON.stringify(err))
-      .end();
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
   }
 });
 
@@ -193,9 +198,9 @@ router.post("/users/register", async (req, res) => {
     }
   } catch (err) {
     res
-      .status(500)
-      .send(JSON.stringify(err))
-      .end();
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
   }
 });
 
@@ -228,9 +233,9 @@ router.get("/tasks/:username", isAuthenticated, async (req, res) => {
     }
   } catch (err) {
     res
-      .status(500)
-      .send(JSON.stringify(err))
-      .end();
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
   }
 });
 
@@ -268,29 +273,66 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
           .end();
         return;
       }
-      
+
       const msg = {
         id,
         username,
         message,
         completed
-      }
+      };
 
       res.send(JSON.stringify(msg)).end();
     }
   } catch (err) {
-    console.log(err);
     res
-      .status(500)
-      .send(JSON.stringify(err))
-      .end();
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
   }
 });
 
-// /tasks/:username/edit/:tid
+// /tasks/:username/edit/:id
 // check that todo id and username match
+// update message and completed values
 
-// /tasks/:username/delete/:tid
-// check that todo id and username match
+// DELETE - Allow user to delete one of their todos
+// PRIVATE route for specific user
+router.delete(
+  "/tasks/:username/delete/:id",
+  isAuthenticated,
+  async (req, res) => {
+    let { username, id } = req.params;
+
+    if (!username || !id) {
+      res
+        .status(400)
+        .send(JSON.stringify(ERROR_MISSING_FIELD))
+        .end();
+      return;
+    }
+
+    username = username.toLowerCase();
+
+    try {
+      const todo = await db.getTodosById(id);
+      // Ensure that this todo is accessible by this user
+      if (!todo || todo.length === 0 || todo[0].username !== username) {
+        return res
+          .status(401)
+          .send(JSON.stringify(ERROR_TOKEN))
+          .end();
+      }
+
+      await db.deleteTodosById(id);
+
+      res.send(JSON.stringify(SUCCESS_DELETE)).end();
+    } catch (err) {
+      res
+        .status(500)
+        .send(JSON.stringify({ status: "error", error: err.toString() }))
+        .end();
+    }
+  }
+);
 
 module.exports = router;
