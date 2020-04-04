@@ -75,9 +75,9 @@ router.get("/users", async (req, res) => {
     res.send(JSON.stringify(rows)).end();
   } catch (err) {
     res
-        .status(500)
-        .send(JSON.stringify({ status: "error", error: err.toString() }))
-        .end();
+      .status(500)
+      .send(JSON.stringify({ status: "error", error: err.toString() }))
+      .end();
   }
 });
 
@@ -87,11 +87,10 @@ router.post("/users/login", async (req, res) => {
     let { username, password } = req.body;
 
     if (!username || !password) {
-      res
+      return res
         .status(400)
         .send(JSON.stringify(ERROR_MISSING_FIELD))
         .end();
-      return;
     }
 
     username = username.toLowerCase();
@@ -99,19 +98,17 @@ router.post("/users/login", async (req, res) => {
     let user = await db.getUserByName(username);
     if (user === undefined) {
       // Username does not exist
-      res
+      return res
         .status(400)
         .send(JSON.stringify(ERROR_USER_NO_EXIST))
         .end();
-      return;
     } else {
       const validAuth = await bcrypt.compare(password, user.password);
       if (!validAuth) {
-        res
+        return res
           .status(400)
           .send(JSON.stringify(ERROR_PASSWORD))
           .end();
-        return;
       }
 
       const token = jwt.sign({ id: user.id }, JWT_SECRET, {
@@ -128,9 +125,9 @@ router.post("/users/login", async (req, res) => {
     }
   } catch (err) {
     res
-        .status(500)
-        .send(JSON.stringify({ status: "error", error: err.toString() }))
-        .end();
+      .status(500)
+      .send(JSON.stringify({ status: "error", error: err.toString() }))
+      .end();
   }
 });
 
@@ -141,11 +138,10 @@ router.post("/users/register", async (req, res) => {
     username = username.toLowerCase();
 
     if (!username || !password) {
-      res
+      return res
         .status(400)
         .send(JSON.stringify(ERROR_MISSING_FIELD))
         .end();
-      return;
     }
 
     let user = await db.getUserByName(username);
@@ -154,29 +150,26 @@ router.post("/users/register", async (req, res) => {
 
       const salt = await bcrypt.genSalt(10);
       if (!salt) {
-        res
+        return res
           .status(400)
           .send(JSON.stringify(ERROR_BCRYPT))
           .end();
-        return;
       }
 
       const hashedPassword = await bcrypt.hash(password, salt);
       if (!hashedPassword) {
-        res
+        return res
           .status(400)
           .send(JSON.stringify(ERROR_HASHING))
           .end();
-        return;
       }
 
       let id = await db.addUser(username, hashedPassword);
       if (!id) {
-        res
+        return res
           .status(400)
           .send(JSON.stringify(ERROR_SAVING))
           .end();
-        return;
       }
 
       const token = jwt.sign({ id: id }, JWT_SECRET, {
@@ -198,9 +191,9 @@ router.post("/users/register", async (req, res) => {
     }
   } catch (err) {
     res
-        .status(500)
-        .send(JSON.stringify({ status: "error", error: err.toString() }))
-        .end();
+      .status(500)
+      .send(JSON.stringify({ status: "error", error: err.toString() }))
+      .end();
   }
 });
 
@@ -211,12 +204,13 @@ router.get("/tasks/:username", isAuthenticated, async (req, res) => {
   username = username.toLowerCase();
 
   if (!username) {
-    res
+    return res
       .status(400)
       .send(JSON.stringify(ERROR_MISSING_FIELD))
       .end();
-    return;
   }
+
+  const decodedId = req.user.id;
 
   try {
     // Check user existence first
@@ -227,15 +221,21 @@ router.get("/tasks/:username", isAuthenticated, async (req, res) => {
         .status(400)
         .send(JSON.stringify(ERROR_USER_NO_EXIST))
         .end();
+    } else if (user.id !== decodedId) {
+      // Username decoded token does not match this user
+      res
+        .status(400)
+        .send(JSON.stringify(ERROR_TOKEN))
+        .end();
     } else {
       let rows = await db.getTodosForName(username);
       res.send(JSON.stringify(rows)).end();
     }
   } catch (err) {
     res
-        .status(500)
-        .send(JSON.stringify({ status: "error", error: err.toString() }))
-        .end();
+      .status(500)
+      .send(JSON.stringify({ status: "error", error: err.toString() }))
+      .end();
   }
 });
 
@@ -245,12 +245,13 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
   let { username } = req.params;
   const { message, completed } = req.body;
 
+  const decodedId = req.user.id;
+
   if (!username || !message || completed === undefined) {
-    res
+    return res
       .status(400)
       .send(JSON.stringify(ERROR_MISSING_FIELD))
       .end();
-    return;
   }
 
   username = username.toLowerCase();
@@ -263,6 +264,12 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
       res
         .status(400)
         .send(JSON.stringify(ERROR_USER_NO_EXIST))
+        .end();
+    } else if (user.id !== decodedId) {
+      // Username decoded token does not match this user
+      res
+        .status(400)
+        .send(JSON.stringify(ERROR_TOKEN))
         .end();
     } else {
       let id = await db.addTodosForName(message, username, completed);
@@ -285,9 +292,9 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
     }
   } catch (err) {
     res
-        .status(500)
-        .send(JSON.stringify({ status: "error", error: err.toString() }))
-        .end();
+      .status(500)
+      .send(JSON.stringify({ status: "error", error: err.toString() }))
+      .end();
   }
 });
 
@@ -305,34 +312,45 @@ router.post("/tasks/:username/edit/:id", isAuthenticated, async (req, res) => {
     return;
   }
 
-    username = username.toLowerCase();
+  const decodedId = req.user.id;
 
-    try {
-      const todo = await db.getTodosById(id);
-      // Ensure that this todo is accessible by this user
-      if (!todo || todo.length === 0 || todo[0].username !== username) {
-        return res
-          .status(401)
-          .send(JSON.stringify(ERROR_TOKEN))
-          .end();
-      }
-      
-      await db.editTodoByID(id, message, completed);
+  username = username.toLowerCase();
 
-      const msg = {
-        id,
-        username,
-        message,
-        completed
-      };
-
-      res.send(JSON.stringify(msg)).end();
-    } catch (err) {
-      res
-        .status(500)
-        .send(JSON.stringify({ status: "error", error: err.toString() }))
+  try {
+    let user = await db.getUserByName(username);
+    if (user.id !== decodedId) {
+      // Username decoded token does not match this user
+      return res
+        .status(400)
+        .send(JSON.stringify(ERROR_TOKEN))
         .end();
     }
+
+    const todo = await db.getTodosById(id);
+    // Ensure that this todo is accessible by this user
+    if (!todo || todo.length === 0 || todo[0].username !== username) {
+      return res
+        .status(401)
+        .send(JSON.stringify(ERROR_TOKEN))
+        .end();
+    }
+
+    await db.editTodoByID(id, message, completed);
+
+    const msg = {
+      id,
+      username,
+      message,
+      completed
+    };
+
+    res.send(JSON.stringify(msg)).end();
+  } catch (err) {
+    res
+      .status(500)
+      .send(JSON.stringify({ status: "error", error: err.toString() }))
+      .end();
+  }
 });
 
 // DELETE - Allow user to delete one of their todos
@@ -352,8 +370,18 @@ router.delete(
     }
 
     username = username.toLowerCase();
+    const decodedId = req.user.id;
 
     try {
+      let user = await db.getUserByName(username);
+      if (user.id !== decodedId) {
+        // Username decoded token does not match this user
+        return res
+          .status(400)
+          .send(JSON.stringify(ERROR_TOKEN))
+          .end();
+      }
+
       const todo = await db.getTodosById(id);
       // Ensure that this todo is accessible by this user
       if (!todo || todo.length === 0 || todo[0].username !== username) {
