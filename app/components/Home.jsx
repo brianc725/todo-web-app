@@ -95,44 +95,35 @@ const Home = function() {
     // Error here
     setError(response.error);
   };
-  
-  const toggleSignOut = async () => {
-    setUser(null);
-  }
 
   return (
     <div>
       <h1>todos</h1>
-      <h3>{user}</h3>
       <p>A website for you to track all of your todos.</p>
-      {!user ? (
-        <ButtonGroup>
-          <Button onClick={toggleLogin}>Login</Button>
-          <LoginModal
-            modalLogin={modalLogin}
-            toggleLogin={toggleLogin}
-            toggleLoginSubmission={toggleLoginSubmission}
-            username={username}
-            password={password}
-            usernameChange={handleUserFieldChange}
-            passwordChange={handlePasswordFieldChange}
-            errorMessage={error}
-          />
-          <Button onClick={toggleRegister}>Register</Button>
-          <RegisterModal
-            modalRegister={modalRegister}
-            toggleRegister={toggleRegister}
-            toggleRegisterSubmission={toggleRegisterSubmission}
-            username={username}
-            password={password}
-            usernameChange={handleUserFieldChange}
-            passwordChange={handlePasswordFieldChange}
-            errorMessage={error}
-          />
-        </ButtonGroup>
-      ) : (
-        <Button onClick={toggleSignOut}>Sign Out</Button>
-      )}
+      <ButtonGroup>
+        <Button onClick={toggleLogin}>Login</Button>
+        <LoginModal
+          modalLogin={modalLogin}
+          toggleLogin={toggleLogin}
+          toggleLoginSubmission={toggleLoginSubmission}
+          username={username}
+          password={password}
+          usernameChange={handleUserFieldChange}
+          passwordChange={handlePasswordFieldChange}
+          errorMessage={error}
+        />
+        <Button onClick={toggleRegister}>Register</Button>
+        <RegisterModal
+          modalRegister={modalRegister}
+          toggleRegister={toggleRegister}
+          toggleRegisterSubmission={toggleRegisterSubmission}
+          username={username}
+          password={password}
+          usernameChange={handleUserFieldChange}
+          passwordChange={handlePasswordFieldChange}
+          errorMessage={error}
+        />
+      </ButtonGroup>
     </div>
   );
 };

@@ -204,9 +204,9 @@ router.post("/users/register", async (req, res) => {
   }
 });
 
-// GET - get all tasks created by this user
+// GET - get all todos created by this user
 // PRIVATE route for specific user
-router.get("/tasks/:username", isAuthenticated, async (req, res) => {
+router.get("/todos/:username", isAuthenticated, async (req, res) => {
   let { username } = req.params;
   username = username.toLowerCase();
 
@@ -246,9 +246,9 @@ router.get("/tasks/:username", isAuthenticated, async (req, res) => {
   }
 });
 
-// POST - add new task for this user
+// POST - add new todo for this user
 // PRIVATE route for specific user
-router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
+router.post("/todos/:username/add", isAuthenticated, async (req, res) => {
   let { username } = req.params;
   const { message, completed } = req.body;
 
@@ -304,9 +304,9 @@ router.post("/tasks/:username/add", isAuthenticated, async (req, res) => {
   }
 });
 
-// /tasks/:username/edit/:id
+// POST - Edit a specific todo id
 // PRIVATE route for specific user
-router.post("/tasks/:username/edit/:id", isAuthenticated, async (req, res) => {
+router.post("/todos/:username/edit/:id", isAuthenticated, async (req, res) => {
   let { username, id } = req.params;
   const { message, completed } = req.body;
 
@@ -361,7 +361,7 @@ router.post("/tasks/:username/edit/:id", isAuthenticated, async (req, res) => {
 // DELETE - Allow user to delete one of their todos
 // PRIVATE route for specific user
 router.delete(
-  "/tasks/:username/delete/:id",
+  "/todos/:username/delete/:id",
   isAuthenticated,
   async (req, res) => {
     let { username, id } = req.params;
