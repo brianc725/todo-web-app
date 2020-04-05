@@ -68,7 +68,32 @@ const Home = function() {
   };
 
   const toggleRegisterSubmission = async () => {
-    setError("username taken already");
+    const data = { username, password };
+
+    // call backend api
+    let loaded = await fetch("/api/users/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const status = await loaded.status;
+    const response = await loaded.json();
+
+    if (status === 200) {
+      setUsername("");
+      setPassword("");
+      // Save the user to context
+      setUser(response);
+      // Redirect to the users todo site if successful
+      history.push("/todos/" + response.username);
+      return;
+    }
+
+    // Error here
+    setError(response.error);
   };
   
   const toggleSignOut = async () => {
