@@ -135,7 +135,6 @@ router.post("/users/login", async (req, res) => {
 router.post("/users/register", async (req, res) => {
   try {
     let { username, password } = req.body;
-    username = username.toLowerCase();
 
     if (!username || !password) {
       return res
@@ -143,6 +142,14 @@ router.post("/users/register", async (req, res) => {
         .send(JSON.stringify(ERROR_MISSING_FIELD))
         .end();
     }
+    
+    username = username.toLowerCase();
+    
+    // TODO - Do some server side validation of username and password first
+    
+    
+    
+    
 
     let user = await db.getUserByName(username);
     if (user === undefined) {
