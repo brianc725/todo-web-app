@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Alert, Button } from "reactstrap";
+import { Alert, Button, ButtonGroup } from "reactstrap";
 import { Redirect, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { UserContext } from "../UserContext";
+import TodoItem from "./TodoItem";
 
 const TodosList = () => {
   const { user, setUser } = useContext(UserContext);
@@ -38,18 +39,40 @@ const TodosList = () => {
     <Redirect to={"/"} />;
   };
 
+  const handleAddTodo = () => {
+    console.log("add");
+  };
+
+  const inProgressTodos = todos.filter(i => i.completed === 0);
+  const completedTodos = todos.filter(i => i.completed === 1);
+
+  const generatedTodos =
+    todos.length > 0 ? (
+      <>
+        <p>In Progress Todos</p>
+        {inProgressTodos.map(i => (
+          <TodoItem key={i.id} id={i.id} message={i.message} />
+        ))}
+        <p>Completed Todos</p>
+        {completedTodos.map(i => (
+          <TodoItem key={i.id} id={i.id} message={i.message} />
+        ))}
+      </>
+    ) : (
+      <p>There are no todos yet.</p>
+    );
+
   return (
     <div>
-      <Button onClick={handleSignOut}>Sign Out</Button>
-      {error ? (
-        <Alert color="danger">{error}</Alert>
-      ) : (
-        // Button for add
-        // map todos array for completed = 0
-        // map todos array for completed = 1
-        
-        <pre>{JSON.stringify(todos, null, 2)}</pre>
-      )}
+        <Button onClick={handleSignOut}>Sign Out</Button>
+        {error ? (
+          <Alert color="danger">{error}</Alert>
+        ) : (
+          <>
+            <Button onClick={handleAddTodo}>Add Todo</Button>
+            {generatedTodos}
+          </>
+        )}
     </div>
   );
 };
