@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Alert, Button, ButtonGroup } from "reactstrap";
+import { Alert, Button, ButtonGroup, Collapse } from "reactstrap";
 import { Redirect, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { UserContext } from "../UserContext";
@@ -10,6 +10,10 @@ const TodosList = () => {
   const location = useLocation();
   const [todos, setTodos] = useState([]);
   const [error, setError] = useState("");
+  const [addingMode, setAddingMode] = useState(false);
+  const [addButtonText, setAddButtonText] = useState("Add Todo");
+  const [modalEdit, setModalEdit] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
 
   useEffect(() => {
     async function fetchTodos() {
@@ -30,18 +34,58 @@ const TodosList = () => {
       // Error
       data = await data.json();
       setError(data.error);
+      sessionStorage.removeItem('user');
     }
     fetchTodos();
   }, []);
 
   const handleSignOut = () => {
     setUser(null);
+    sessionStorage.removeItem('user');
     <Redirect to={"/"} />;
   };
 
   const handleAddTodo = () => {
-    console.log("add");
+    // If in add mode update add state
+    // generate a new TodoItem with edit mode on already
+    const nextMode = !addingMode;
+
+    if (nextMode) {
+      setAddButtonText("Cancel New Todo");
+    } else {
+      setAddButtonText("Add Todo");
+    }
+
+    setAddingMode(nextMode);
   };
+
+  const handleEditTodo = () => {
+    console.log('Cancelling edit')
+    
+    setModalEdit(!modalEdit);
+  };
+  
+  const handleEditSubmission = () => {
+    //backend API call here
+    console.log('Editing this todo')
+    
+    setModalEdit(!modalEdit);
+  }
+  
+  const handleDeleteTodo = () => {
+    console.log('Cancelling deleition')
+    
+    setModalDelete(!modalDelete);
+  }
+  
+  const handleDeleteSubmission = () => {
+    // backend API call here
+    
+    console.log('Deleting this todo')
+    
+    setModalEdit(!modalEdit);
+    setModalDelete(!modalDelete);
+  }
 
   const inProgressTodos = todos.filter(i => i.completed === 0);
   const completedTodos = todos.filter(i => i.completed === 1);
@@ -51,11 +95,21 @@ const TodosList = () => {
       <>
         <p>In Progress Todos</p>
         {inProgressTodos.map(i => (
-          <TodoItem key={i.id} id={i.id} message={i.message} />
+          <TodoItem
+            key={i.id}
+            item={i}
+            modalEdit={modalEdit}
+            toggleEdit={handleEditTodo}
+            toggleEditSubmission={handleEditSubmission}
+            modalDeletion={modalDelete}
+            toggleModalDeletion={handleDeleteTodo}
+            toggleModalDeletionSubmission={handleDeleteSubmission}
+            errorMessage={error}
+          />
         ))}
         <p>Completed Todos</p>
         {completedTodos.map(i => (
-          <TodoItem key={i.id} id={i.id} message={i.message} />
+          <TodoItem key={i.id} item={i} handleEdit={handleEditTodo} />
         ))}
       </>
     ) : (
@@ -64,15 +118,18 @@ const TodosList = () => {
 
   return (
     <div>
-        <Button onClick={handleSignOut}>Sign Out</Button>
-        {error ? (
-          <Alert color="danger">{error}</Alert>
-        ) : (
-          <>
-            <Button onClick={handleAddTodo}>Add Todo</Button>
-            {generatedTodos}
-          </>
-        )}
+      <Button onClick={handleSignOut}>Sign Out</Button>
+      {error ? (
+        <Alert color="danger">{error}</Alert>
+      ) : (
+        <>
+          <Button onClick={handleAddTodo}>{addButtonText}</Button>
+          <Collapse isOpen={addingMode}>
+            <p>Form for input adding here</p>
+          </Collapse>
+          {generatedTodos}
+        </>
+      )}
     </div>
   );
 };

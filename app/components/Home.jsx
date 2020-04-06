@@ -58,6 +58,7 @@ const Home = function() {
       setPassword("");
       // Save the user to context
       setUser(response);
+      sessionStorage.setItem('user', JSON.stringify(response));
       // Redirect to the users todo site if successful
       history.push("/todos/" + response.username);
       return;
@@ -87,6 +88,7 @@ const Home = function() {
       setPassword("");
       // Save the user to context
       setUser(response);
+      sessionStorage.setItem('user', JSON.stringify(response));
       // Redirect to the users todo site if successful
       history.push("/todos/" + response.username);
       return;

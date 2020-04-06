@@ -19,7 +19,11 @@ import TodosList from "./components/TodosList";
 
 function App() {
   // React Context tutorial from https://www.youtube.com/watch?v=lhMKvyLRWo0
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(
+    sessionStorage.getItem("user")
+      ? JSON.parse(sessionStorage.getItem("user"))
+      : null
+  );
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
 
   return (
