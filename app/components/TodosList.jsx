@@ -14,6 +14,7 @@ const TodosList = () => {
   const [addButtonText, setAddButtonText] = useState("Add Todo");
   const [modalEdit, setModalEdit] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
+  const [modalItem, setModalItem] = useState(undefined);
 
   useEffect(() => {
     async function fetchTodos() {
@@ -50,6 +51,8 @@ const TodosList = () => {
     // generate a new TodoItem with edit mode on already
     const nextMode = !addingMode;
 
+   // array.concat 
+    
     if (nextMode) {
       setAddButtonText("Cancel New Todo");
     } else {
@@ -59,32 +62,77 @@ const TodosList = () => {
     setAddingMode(nextMode);
   };
 
-  const handleEditTodo = () => {
-    console.log('Cancelling edit')
-    
+  const handleEditTodo = (item) => {
     setModalEdit(!modalEdit);
+    
+    if (!modalItem) {
+      setModalItem(item);
+    } else {
+      setModalItem(undefined);
+    }
   };
   
-  const handleEditSubmission = () => {
+  const handleEditSubmission = (item) => {
     //backend API call here
-    console.log('Editing this todo')
+    console.log('Editing this todo', item)
     
     setModalEdit(!modalEdit);
+    
+    if (!modalItem) {
+      setModalItem(item);
+    } else {
+      setModalItem(undefined);
+    }
   }
   
   const handleDeleteTodo = () => {
-    console.log('Cancelling deleition')
-    
     setModalDelete(!modalDelete);
   }
   
-  const handleDeleteSubmission = () => {
+  const handleDeleteSubmission = (item) => {
     // backend API call here
     
-    console.log('Deleting this todo')
+    // notes.filter(n => n.id !== id)    
+    
+    console.log('Deleting this todo', item)
     
     setModalEdit(!modalEdit);
     setModalDelete(!modalDelete);
+    
+    if (!modalItem) {
+      setModalItem(item);
+    } else {
+      setModalItem(undefined);
+    }
+  }
+  
+  const handleToggleCompletion = async (item) => {
+    const nextCompletedStatus = Number(!item.completed);
+    
+    const data = {
+      "message": item.message,
+      "completed": nextCompletedStatus
+    }
+
+    let loaded = await fetch("/api/todos/" + item.username + "/edit/" + item.id, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": user.token
+      },
+      body: JSON.stringify(data)
+    });
+
+    const status = await loaded.status;
+    const response = await loaded.json();
+    
+    if (status === 200) {
+      // update the hook 
+      setTodos(todos.map(i => i.id !== item.id ? i : response));
+      return;
+    }
+    
+    setError(response.error);
   }
 
   const inProgressTodos = todos.filter(i => i.completed === 0);
@@ -98,18 +146,32 @@ const TodosList = () => {
           <TodoItem
             key={i.id}
             item={i}
+            modalItem={modalItem}
             modalEdit={modalEdit}
             toggleEdit={handleEditTodo}
             toggleEditSubmission={handleEditSubmission}
             modalDeletion={modalDelete}
             toggleModalDeletion={handleDeleteTodo}
             toggleModalDeletionSubmission={handleDeleteSubmission}
+            toggleCompletion={handleToggleCompletion}
             errorMessage={error}
           />
         ))}
         <p>Completed Todos</p>
         {completedTodos.map(i => (
-          <TodoItem key={i.id} item={i} handleEdit={handleEditTodo} />
+          <TodoItem
+            key={i.id}
+            item={i}
+            modalItem={modalItem}
+            modalEdit={modalEdit}
+            toggleEdit={handleEditTodo}
+            toggleEditSubmission={handleEditSubmission}
+            modalDeletion={modalDelete}
+            toggleModalDeletion={handleDeleteTodo}
+            toggleModalDeletionSubmission={handleDeleteSubmission}
+            toggleCompletion={handleToggleCompletion}
+            errorMessage={error}
+          />
         ))}
       </>
     ) : (

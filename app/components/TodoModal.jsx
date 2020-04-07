@@ -10,6 +10,7 @@ import {
 import styled from "styled-components";
 
 const TodoModal = ({
+  item, 
   modalEdit,
   toggleEdit,
   toggleEditSubmission,
@@ -22,10 +23,10 @@ const TodoModal = ({
     <Modal isOpen={modalEdit} toggle={toggleEdit} scrollable={true}>
       <ModalHeader toggle={toggleEdit}>Edit Todo</ModalHeader>
       <ModalBody>
-        <Label>Edit form will go here</Label>
+        <Label>Edit form will go here </Label>
       </ModalBody>
       <ModalFooter>
-        <Button color="primary" onClick={toggleEditSubmission}>
+        <Button color="primary" onClick={() => toggleEditSubmission(item)}>
           Submit
         </Button>{" "}
         <Button color="danger" onClick={toggleModalDeletion}>
@@ -43,7 +44,7 @@ const TodoModal = ({
             <Label>Are you sure you want to delete this todo?</Label>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" onClick={toggleModalDeletionSubmission}>
+            <Button color="danger" onClick={() => toggleModalDeletionSubmission(item)}>
               Delete
             </Button>{" "}
             <Button color="secondary" onClick={toggleModalDeletion}>

@@ -12,31 +12,30 @@ import TodoModal from "./TodoModal";
 
 const TodoItem = ({
   item,
+  modalItem,
   modalEdit,
   toggleEdit,
   toggleEditSubmission,
   modalDeletion,
   toggleModalDeletion,
   toggleModalDeletionSubmission,
+  toggleCompletion,
   errorMessage
 }) => {
-  // toggle completion or not
-
-  // In edit mode change edit to submit and delete to cancel
-  // disabled={disabled}
-
-  // modal with submit, DELETE, cancel
-  // DELETE second nested modal to confirm
-
   return (
     <InputGroup>
       <InputGroupAddon addonType="prepend">
-        {!item.completed ? <Button>Done!</Button> : <Button>Reopen</Button>}
+        {!item.completed ? (
+          <Button onClick={() => toggleCompletion(item)}>Done!</Button>
+        ) : (
+          <Button onClick={() => toggleCompletion(item)}>Reopen</Button>
+        )}
       </InputGroupAddon>
       <Input disabled value={item.message} />
       <InputGroupAddon addonType="append">
-        <Button onClick={toggleEdit}>Edit</Button>
+        <Button onClick={() => toggleEdit(item)}>Edit</Button>
         <TodoModal
+          item={modalItem}
           modalEdit={modalEdit}
           toggleEdit={toggleEdit}
           toggleEditSubmission={toggleEditSubmission}
