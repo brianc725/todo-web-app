@@ -1,0 +1,26 @@
+.site_container {
+  padding-top: 12.5%;
+  margin: auto;
+  width: 50%;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  /*when screen gets medium update margins*/
+  .site_container {
+    padding-top: 12.5%;
+    margin: auto;
+    width: 75%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 479px) {
+  /*when screen gets small update margins*/
+  .site_container {
+    padding-top: 12.5%;
+    margin: auto;
+    width: 75%;
+    text-align: center;
+  }
+}
