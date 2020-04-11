@@ -5,7 +5,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Label
+  Label,
+  Input
 } from "reactstrap";
 import styled from "styled-components";
 
@@ -17,13 +18,15 @@ const TodoModal = ({
   modalDeletion,
   toggleModalDeletion,
   toggleModalDeletionSubmission,
+  editFormText,
+  handleEditFormChange,
   errorMessage
 }) => {
   return (
     <Modal isOpen={modalEdit} toggle={toggleEdit} scrollable={true}>
       <ModalHeader toggle={toggleEdit}>Edit Todo</ModalHeader>
       <ModalBody>
-        <Label>Edit form will go here </Label>
+        <Input onChange={handleEditFormChange} value={editFormText} />
       </ModalBody>
       <ModalFooter>
         <Button color="primary" onClick={() => toggleEditSubmission(item)}>
