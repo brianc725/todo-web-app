@@ -72,25 +72,22 @@ const TodosList = () => {
 
   const handleAddSubmit = async () => {
     const data = {
-      "message": newTodoText,
-      "completed": 0,
+      message: newTodoText,
+      completed: 0
     };
-    
-     let loaded = await fetch(
-      "/api/todos/" + user.username + "/add/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": user.token
-        },
-        body: JSON.stringify(data)
-      }
-    );
+
+    let loaded = await fetch("/api/todos/" + user.username + "/add/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": user.token
+      },
+      body: JSON.stringify(data)
+    });
 
     const status = await loaded.status;
     const response = await loaded.json();
-    
+
     toggleAddMode();
 
     if (status === 200) {
@@ -99,12 +96,12 @@ const TodosList = () => {
       return;
     }
 
-    setError(response.error);    
+    setError(response.error);
   };
-  
+
   const handleAddChange = e => {
     setNewTodoText(e.target.value);
-  }
+  };
 
   const handleEditTodo = item => {
     setModalEdit(!modalEdit);
@@ -133,19 +130,34 @@ const TodosList = () => {
     setModalDelete(!modalDelete);
   };
 
-  const handleDeleteSubmission = item => {
-    // backend API call here
-
-    // notes.filter(n => n.id !== id)
-
-    console.log("Deleting this todo", item);
-
+  const handleDeleteSubmission = async item => {
     setModalEdit(!modalEdit);
     setModalDelete(!modalDelete);
 
     if (!modalItem) {
       setModalItem(item);
     } else {
+      let loaded = await fetch(
+        "/api/todos/" + user.username + "/delete/" + item.id,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": user.token
+          }
+        }
+      );
+
+      const status = await loaded.status;
+      const response = await loaded.json();
+
+      if (status === 200) {
+        // update the hook
+        setTodos(todos.filter(i => i.id !== item.id));
+        setModalItem(undefined);
+        return;
+      }
+      setError(response.error);
       setModalItem(undefined);
     }
   };
