@@ -20,6 +20,8 @@ const TodoItem = ({
   toggleModalDeletion,
   toggleModalDeletionSubmission,
   toggleCompletion,
+  editFormText,
+  handleEditFormChange,
   errorMessage
 }) => {
   return (
@@ -42,6 +44,8 @@ const TodoItem = ({
           modalDeletion={modalDeletion}
           toggleModalDeletion={toggleModalDeletion}
           toggleModalDeletionSubmission={toggleModalDeletionSubmission}
+          editFormText={editFormText}
+          handleEditFormChange={handleEditFormChange}
           errorMessage={errorMessage}
         />
       </InputGroupAddon>

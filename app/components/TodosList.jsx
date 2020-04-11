@@ -24,6 +24,7 @@ const TodosList = () => {
   const [modalDelete, setModalDelete] = useState(false);
   const [modalItem, setModalItem] = useState(undefined);
   const [newTodoText, setNewTodoText] = useState("");
+  const [editForm, setEditForm] = useState("");
 
   useEffect(() => {
     async function fetchTodos() {
@@ -108,22 +109,54 @@ const TodosList = () => {
 
     if (!modalItem) {
       setModalItem(item);
+      setEditForm(item.message);
     } else {
+      setEditForm("");
       setModalItem(undefined);
     }
   };
 
-  const handleEditSubmission = item => {
-    //backend API call here
-    console.log("Editing this todo", item);
-
+  const handleEditSubmission = async item => {
     setModalEdit(!modalEdit);
 
     if (!modalItem) {
       setModalItem(item);
     } else {
+
+      const data = {
+        message: editForm,
+        completed: item.completed
+      };
+
+      let loaded = await fetch(
+        "/api/todos/" + item.username + "/edit/" + item.id,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": user.token
+          },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const status = await loaded.status;
+      const response = await loaded.json();
+
+      if (status === 200) {
+        // update the hook
+        setTodos(todos.map(i => (i.id !== item.id ? i : response)));
+      } else {
+        setError(response.error);
+      }
+
+      handleEditTodo();
       setModalItem(undefined);
     }
+  };
+
+  const handleEditFormChange = e => {
+    setEditForm(e.target.value);
   };
 
   const handleDeleteTodo = () => {
@@ -154,10 +187,10 @@ const TodosList = () => {
       if (status === 200) {
         // update the hook
         setTodos(todos.filter(i => i.id !== item.id));
-        setModalItem(undefined);
-        return;
+      } else {
+        setError(response.error);
       }
-      setError(response.error);
+
       setModalItem(undefined);
     }
   };
@@ -188,10 +221,9 @@ const TodosList = () => {
     if (status === 200) {
       // update the hook
       setTodos(todos.map(i => (i.id !== item.id ? i : response)));
-      return;
+    } else {
+      setError(response.error);
     }
-
-    setError(response.error);
   };
 
   const inProgressTodos = todos.filter(i => i.completed === 0);
@@ -213,6 +245,8 @@ const TodosList = () => {
             toggleModalDeletion={handleDeleteTodo}
             toggleModalDeletionSubmission={handleDeleteSubmission}
             toggleCompletion={handleToggleCompletion}
+            editFormText={editForm}
+            handleEditFormChange={handleEditFormChange}
             errorMessage={error}
           />
         ))}
@@ -229,6 +263,8 @@ const TodosList = () => {
             toggleModalDeletion={handleDeleteTodo}
             toggleModalDeletionSubmission={handleDeleteSubmission}
             toggleCompletion={handleToggleCompletion}
+            editFormText={editForm}
+            handleEditFormChange={handleEditFormChange}
             errorMessage={error}
           />
         ))}
