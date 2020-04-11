@@ -52,7 +52,7 @@ Handles the table creations and all necessary SQL database operations for the sq
 Just the basic express setup. Any routes to `/api` will route through backend file `api/controller.js` instead.
 All other routes will just serve the static `html` site that React will later manipulate.
 
-### Notes
+## Notes
 
 Commits were made by the Glitch export feature, and thus the user committing is as "Glitch (todo-app-sqlite3)"
 instead of my normal account. However, aside from the boilerplate files such as `watch.json` and 

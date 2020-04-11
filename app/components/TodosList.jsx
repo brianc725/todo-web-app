@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Alert, Button, ButtonGroup, Collapse } from "reactstrap";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  Collapse,
+  InputGroup,
+  Input,
+  InputGroupAddon
+} from "reactstrap";
 import { Redirect, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { UserContext } from "../UserContext";
@@ -15,6 +23,7 @@ const TodosList = () => {
   const [modalEdit, setModalEdit] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
   const [modalItem, setModalItem] = useState(undefined);
+  const [newTodoText, setNewTodoText] = useState("");
 
   useEffect(() => {
     async function fetchTodos() {
@@ -35,105 +44,143 @@ const TodosList = () => {
       // Error
       data = await data.json();
       setError(data.error);
-      sessionStorage.removeItem('user');
+      sessionStorage.removeItem("user");
     }
     fetchTodos();
   }, []);
 
   const handleSignOut = () => {
     setUser(null);
-    sessionStorage.removeItem('user');
+    sessionStorage.removeItem("user");
     <Redirect to={"/"} />;
   };
 
-  const handleAddTodo = () => {
+  const toggleAddMode = () => {
     // If in add mode update add state
-    // generate a new TodoItem with edit mode on already
+
     const nextMode = !addingMode;
 
-   // array.concat 
-    
     if (nextMode) {
       setAddButtonText("Cancel New Todo");
     } else {
       setAddButtonText("Add Todo");
+      setNewTodoText("");
     }
 
     setAddingMode(nextMode);
   };
 
-  const handleEditTodo = (item) => {
-    setModalEdit(!modalEdit);
+  const handleAddSubmit = async () => {
+    const data = {
+      "message": newTodoText,
+      "completed": 0,
+    };
     
+     let loaded = await fetch(
+      "/api/todos/" + user.username + "/add/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": user.token
+        },
+        body: JSON.stringify(data)
+      }
+    );
+
+    const status = await loaded.status;
+    const response = await loaded.json();
+    
+    toggleAddMode();
+
+    if (status === 200) {
+      // update the hook
+      setTodos(todos.concat(response));
+      return;
+    }
+
+    setError(response.error);    
+  };
+  
+  const handleAddChange = e => {
+    setNewTodoText(e.target.value);
+  }
+
+  const handleEditTodo = item => {
+    setModalEdit(!modalEdit);
+
     if (!modalItem) {
       setModalItem(item);
     } else {
       setModalItem(undefined);
     }
   };
-  
-  const handleEditSubmission = (item) => {
+
+  const handleEditSubmission = item => {
     //backend API call here
-    console.log('Editing this todo', item)
-    
+    console.log("Editing this todo", item);
+
     setModalEdit(!modalEdit);
-    
+
     if (!modalItem) {
       setModalItem(item);
     } else {
       setModalItem(undefined);
     }
-  }
-  
+  };
+
   const handleDeleteTodo = () => {
     setModalDelete(!modalDelete);
-  }
-  
-  const handleDeleteSubmission = (item) => {
+  };
+
+  const handleDeleteSubmission = item => {
     // backend API call here
-    
-    // notes.filter(n => n.id !== id)    
-    
-    console.log('Deleting this todo', item)
-    
+
+    // notes.filter(n => n.id !== id)
+
+    console.log("Deleting this todo", item);
+
     setModalEdit(!modalEdit);
     setModalDelete(!modalDelete);
-    
+
     if (!modalItem) {
       setModalItem(item);
     } else {
       setModalItem(undefined);
     }
-  }
-  
-  const handleToggleCompletion = async (item) => {
-    const nextCompletedStatus = Number(!item.completed);
-    
-    const data = {
-      "message": item.message,
-      "completed": nextCompletedStatus
-    }
+  };
 
-    let loaded = await fetch("/api/todos/" + item.username + "/edit/" + item.id, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": user.token
-      },
-      body: JSON.stringify(data)
-    });
+  const handleToggleCompletion = async item => {
+    const nextCompletedStatus = Number(!item.completed);
+
+    const data = {
+      message: item.message,
+      completed: nextCompletedStatus
+    };
+
+    let loaded = await fetch(
+      "/api/todos/" + item.username + "/edit/" + item.id,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": user.token
+        },
+        body: JSON.stringify(data)
+      }
+    );
 
     const status = await loaded.status;
     const response = await loaded.json();
-    
+
     if (status === 200) {
-      // update the hook 
-      setTodos(todos.map(i => i.id !== item.id ? i : response));
+      // update the hook
+      setTodos(todos.map(i => (i.id !== item.id ? i : response)));
       return;
     }
-    
+
     setError(response.error);
-  }
+  };
 
   const inProgressTodos = todos.filter(i => i.completed === 0);
   const completedTodos = todos.filter(i => i.completed === 1);
@@ -178,19 +225,26 @@ const TodosList = () => {
       <p>There are no todos yet.</p>
     );
 
+  const addTodoForm = (
+    <InputGroup>
+      <Input onChange={handleAddChange} value={newTodoText} />
+      <InputGroupAddon addonType="append">
+        <Button onClick={handleAddSubmit}>Submit</Button>
+      </InputGroupAddon>
+    </InputGroup>
+  );
+
   return (
     <div>
       <Button onClick={handleSignOut}>Sign Out</Button>
       {error ? (
         <Alert color="danger">{error}</Alert>
       ) : (
-        <>
-          <Button onClick={handleAddTodo}>{addButtonText}</Button>
-          <Collapse isOpen={addingMode}>
-            <p>Form for input adding here</p>
-          </Collapse>
+        <div>
+          <Button onClick={toggleAddMode}>{addButtonText}</Button>
+          <Collapse isOpen={addingMode}>{addTodoForm}</Collapse>
           {generatedTodos}
-        </>
+        </div>
       )}
     </div>
   );

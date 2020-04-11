@@ -26,14 +26,14 @@ const TodoItem = ({
     <InputGroup>
       <InputGroupAddon addonType="prepend">
         {!item.completed ? (
-          <Button onClick={() => toggleCompletion(item)}>Done!</Button>
+          <Button onClick={() => toggleCompletion(item)}>&#9744;</Button>
         ) : (
-          <Button onClick={() => toggleCompletion(item)}>Reopen</Button>
+          <Button onClick={() => toggleCompletion(item)}>&#9746;</Button>
         )}
       </InputGroupAddon>
       <Input disabled value={item.message} />
       <InputGroupAddon addonType="append">
-        <Button onClick={() => toggleEdit(item)}>Edit</Button>
+        <Button onClick={() => toggleEdit(item)}>&#9998;</Button>
         <TodoModal
           item={modalItem}
           modalEdit={modalEdit}
