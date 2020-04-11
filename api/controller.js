@@ -40,6 +40,14 @@ const ERROR_TOKEN = {
   status: "error",
   error: "Token is not valid or not authorized."
 };
+const ERROR_USER_SELECT = {
+  status: "error",
+  error: "Chosen username does not fit proper parameters."
+};
+const ERROR_PW_SELECT = {
+  status: "error",
+  error: "Chosen password does not fit proper parameters."
+}
 
 // Middleware function to verify if user is authenticated or not
 function isAuthenticated(req, res, next) {
@@ -67,19 +75,6 @@ function isAuthenticated(req, res, next) {
       .end();
   }
 }
-
-// GET - get all users
-// router.get("/users", async (req, res) => {
-//   try {
-//     let rows = await db.getAllUsers();
-//     res.send(JSON.stringify(rows)).end();
-//   } catch (err) {
-//     res
-//       .status(500)
-//       .send(JSON.stringify({ status: "error", error: err.toString() }))
-//       .end();
-//   }
-// });
 
 // POST - login user
 router.post("/users/login", async (req, res) => {
@@ -145,11 +140,21 @@ router.post("/users/register", async (req, res) => {
     
     username = username.toLowerCase();
     
-    // TODO - Do some server side validation of username and password first
+    // Server side validation of username and password first
+    const usernameRegex = /^[A-Za-z0-9]{5,30}$/;
+    if (username.match(usernameRegex) === null) {
+      return res
+        .status(400)
+        .send(JSON.stringify(ERROR_USER_SELECT))
+        .end();
+    }
     
-    
-    
-    
+    if (username === password.toLowerCase() || password.length < 8 || password.length > 30) {
+      return res
+        .status(400)
+        .send(JSON.stringify(ERROR_PW_SELECT))
+        .end();
+    }
 
     let user = await db.getUserByName(username);
     if (user === undefined) {

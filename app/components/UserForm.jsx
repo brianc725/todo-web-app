@@ -17,10 +17,7 @@ const UserForm = ({
   passwordChange,
   errorMessage
 }) => {
-  
-  const alertStatus = (
-    <Alert color="danger">{errorMessage}</Alert>
-  );
+  const alertStatus = <Alert color="danger">{errorMessage}</Alert>;
 
   return (
     <Form>
@@ -48,7 +45,10 @@ const UserForm = ({
           onChange={passwordChange}
           value={password}
         />
-        <FormText>Password is 8-30 characters, case sensitive.</FormText>
+        <FormText>
+          Password is 8-30 characters, case sensitive. Cannot be the same as
+          username.
+        </FormText>
       </FormGroup>
     </Form>
   );
