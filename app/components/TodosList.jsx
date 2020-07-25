@@ -12,6 +12,7 @@ import { Redirect, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { UserContext } from "../UserContext";
 import TodoItem from "./TodoItem";
+import "../styles.css";
 
 const TodosList = () => {
   const { user, setUser } = useContext(UserContext);
@@ -232,7 +233,7 @@ const TodosList = () => {
   const generatedTodos =
     todos.length > 0 ? (
       <>
-        <p>In Progress Todos</p>
+        <p className="header_p">In Progress Todos</p>
         {inProgressTodos.map(i => (
           <TodoItem
             key={i.id}
@@ -250,7 +251,7 @@ const TodosList = () => {
             errorMessage={error}
           />
         ))}
-        <p>Completed Todos</p>
+        <p className="header_p">Completed Todos</p>
         {completedTodos.map(i => (
           <TodoItem
             key={i.id}
@@ -284,12 +285,12 @@ const TodosList = () => {
 
   return (
     <div>
-      <Button onClick={handleSignOut}>Sign Out</Button>
+      <Button onClick={handleSignOut} className="btn_todo">Sign Out</Button>
       {error ? (
         <Alert color="danger">{error}</Alert>
       ) : (
         <div>
-          <Button onClick={toggleAddMode}>{addButtonText}</Button>
+          <Button onClick={toggleAddMode} className={addingMode ? "btn_todo" : ''}>{addButtonText}</Button>
           <Collapse isOpen={addingMode}>{addTodoForm}</Collapse>
           {generatedTodos}
         </div>
