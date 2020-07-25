@@ -24,3 +24,19 @@
     text-align: center;
   }
 }
+
+.btn_todo {
+  margin-bottom: 15px;
+}
+
+.completed {
+  text-decoration: line-through;
+}
+
+.header_p {
+  margin-top: 15px;
+}
+
+.todo_block {
+  margin-bottom: 5px;
+}

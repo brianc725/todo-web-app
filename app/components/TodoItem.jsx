@@ -9,6 +9,7 @@ import {
 } from "reactstrap";
 import styled from "styled-components";
 import TodoModal from "./TodoModal";
+import '../styles.css';
 
 const TodoItem = ({
   item,
@@ -25,7 +26,7 @@ const TodoItem = ({
   errorMessage
 }) => {
   return (
-    <InputGroup>
+    <InputGroup className="todo_block">
       <InputGroupAddon addonType="prepend">
         {!item.completed ? (
           <Button onClick={() => toggleCompletion(item)}>&#9744;</Button>
@@ -33,7 +34,7 @@ const TodoItem = ({
           <Button onClick={() => toggleCompletion(item)}>&#9746;</Button>
         )}
       </InputGroupAddon>
-      <Input disabled value={item.message} />
+      <Input disabled value={item.message} className={item.completed ? "completed" : ''}/>
       <InputGroupAddon addonType="append">
         <Button onClick={() => toggleEdit(item)}>&#9998;</Button>
         <TodoModal
